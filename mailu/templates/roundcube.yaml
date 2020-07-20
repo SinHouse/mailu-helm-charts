@@ -68,8 +68,9 @@ spec:
           - name: ROUNDCUBE_DB_HOST
             {{- if .Values.database.mysql.host }}
             value: {{ .Values.database.mysql.host }}
-            {{- end }}
+            {{- else }}
             value: {{ include "mailu.fullname" . }}-mysql
+          {{- end }}
           {{- else }}
           value: {{ required "database.type must be one of sqlite/mysql" .None }}
           {{- end }}
@@ -97,13 +98,13 @@ spec:
       volumes:
         - name: data
           persistentVolumeClaim:
-{{- if .Values.roundcube.persistence.claimEnabled }}  
+{{- if .Values.roundcube.persistence.claimEnabled }}
 {{- if .Values.roundcube.persistence.existingClaim }}
             claimName: {{ .Values.roundcube.persistence.existingClaim }}
 {{- else }}
             {{- $_ := set . "deploy" "roundcube" }}
             claimName: {{ include "mailu.deployClaimName" . }}
-{{- end }}   
+{{- end }}
 {{- else }}
             claimName: {{ include "mailu.claimName" . }}
 {{- end }}
