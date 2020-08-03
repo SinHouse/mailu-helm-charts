@@ -25,13 +25,12 @@
 | `hostnames`                       | List of hostnames to generate certificates and ingresses for | not set           |
 | `domain`                          | Mail domain name, see https://github.com/Mailu/Mailu/blob/master/docs/faq.rst#what-is-the-difference-between-domain-and-hostnames | not set |
 | `passwordScheme`                  | Scheme used to hash passwords        | `PBKDF2`                                  |
-| `secretKey`                       | Session encryption key for admin and webmail | not set                           |
+| `mailuSecretsName`                | Mailu secrets name                   | `mailu-secrets`                           |
 | `subnet`                          | Subnet of PODs, used to configure from which IPs internal requests are allowed | `10.42.0.0/16` |
 | `mail.messageSizeLimitInMegabytes`| Message size limit in Megabytes      | `50`                                      |
 | `mail.authRatelimit`              | Rate limit for authentication requests | `10/minute;1000/hour`                   |
 | `initialAccount.username`         | Local part (part before @) for initial admin account | not set                   |
 | `initialAccount.domain`           | Domain part (part after @) for initial admin account | not set                   |
-| `initialAccount.password`         | Password for initial admin account   | not set                                   |
 | `certificateSecretName`           | The secret for the certificate       | `[chart-full-name]-certificates`          |
 | `certmanager.enabled`             | Use cert manager true/false          | `true`                                    |
 | `certmanager.apiVersion`          | Custom apiVersion                    | `cert-manager.io/v1alpha2`                |
@@ -64,16 +63,14 @@ hostnames:
 - mail.mydomain.com
 initialAccount:
   domain: mail.mydomain.com
-  password: chang3m3!
-  username: mailadmin
+  username: admin
 logLevel: INFO
 mail:
   authRatelimit: 100/minute;3600/hour
   messageSizeLimitInMegabytes: 200
 persistence:
   size: 100Gi
-  storageClass: fast
-secretKey: chang3m3!
+  storageClass: nfs
 ```
 
 ## Persistence
@@ -118,11 +115,11 @@ By default both, mailu and dovecot uses an embedded sqlite database. The chart a
 
 ### Using mysql for mailu
 
-Set ``database.type`` to ``mysql``. ``database.mysql.database``, ``database.mysql.user``, and ``database.mysql.password`` must also be set.
+Set ``database.type`` to ``mysql``. ``database.mysql.database`` and ``database.mysql.user`` must also be set.
 
 ### Using mysql for roundcube
 
-Set ``database.roundcubeType`` to ``mysql``. ``database.mysql.roundcubeDatabase``, ``database.mysql.roundcubeUser``, and ``database.mysql.roundcubePassword`` must also be set.
+Set ``database.roundcubeType`` to ``mysql``. ``database.mysql.roundcubeDatabase`` and ``database.mysql.roundcubeUser`` must also be set.
 
 ### Using the internal mysql database
 

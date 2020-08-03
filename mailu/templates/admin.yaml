@@ -77,7 +77,10 @@ spec:
           - name: PASSWORD_SCHEME
             value: "{{ default "PBKDF2" .Values.passwordScheme }}"
           - name: SECRET_KEY
-            value: "{{ required "secretKey" .Values.secretKey }}"
+            valueFrom:
+              secretKeyRef:
+                name: {{ required "mailuSecretsName" .Values.mailuSecretsName }}
+                key: SECRET_KEY
           - name: AUTH_RATELIMIT
             value: "{{ required "mail.authRatelimit" .Values.mail.authRatelimit }}"
           {{- if .Values.initialAccount }}
@@ -86,7 +89,10 @@ spec:
           - name: INITIAL_ADMIN_DOMAIN
             value: {{ required "initialAccount.domain" .Values.initialAccount.domain }}
           - name: INITIAL_ADMIN_PW
-            value: {{ required "initialAccount.password" .Values.initialAccount.password }}
+            valueFrom:
+              secretKeyRef:
+                name: {{ required "mailuSecretsName" .Values.mailuSecretsName }}
+                key: ADMIN_PASSWORD
           {{- end }}
           {{- if eq .Values.database.type "sqlite" }}
           - name: DB_FLAVOR
@@ -97,7 +103,10 @@ spec:
           - name: DB_USER
             value: {{ required "database.mysql.user" .Values.database.mysql.user }}
           - name: DB_PW
-            value: {{ required "database.mysql.password" .Values.database.mysql.password }}
+            valueFrom:
+              secretKeyRef:
+                name: {{ required "mailuSecretsName" .Values.mailuSecretsName }}
+                key: MAILU_DB_PWD
           - name: DB_NAME
             value: {{ required "database.mysql.database" .Values.database.mysql.database }}
           - name: DB_HOST

@@ -69,6 +69,8 @@ spec:
           {{- end }}
           - name: SUBNET
             value: "{{ .Values.subnet }}"
+          - name: ANTIVIRUS_ACTION
+            value: reject
         ports:
           - name: rspamd
             containerPort: 11332

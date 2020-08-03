@@ -68,7 +68,10 @@ spec:
           - name: WEBMAIL
             value: none
           - name: SECRET_KEY
-            value: "{{ required "secretKey" .Values.secretKey }}"
+            valueFrom:
+              secretKeyRef:
+                name: {{ required "mailuSecretsName" .Values.mailuSecretsName }}
+                key: SECRET_KEY
         ports:
           - name: auth
             containerPort: 2102

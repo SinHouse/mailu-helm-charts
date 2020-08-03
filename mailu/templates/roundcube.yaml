@@ -50,7 +50,10 @@ spec:
           - name: FRONT_ADDRESS
             value: {{ include "mailu.fullname" . }}-front
           - name: SECRET_KEY
-            value: "{{ required "secretKey" .Values.secretKey }}"
+            valueFrom:
+              secretKeyRef:
+                name: {{ required "mailuSecretsName" .Values.mailuSecretsName }}
+                key: SECRET_KEY
           - name: SUBNET
             value: {{ .Values.subnet }}
           {{- if eq .Values.database.roundcubeType "sqlite" }}
@@ -62,7 +65,10 @@ spec:
           - name: ROUNDCUBE_DB_USER
             value: {{ required "database.mysql.roundcubeUser" .Values.database.mysql.roundcubeUser }}
           - name: ROUNDCUBE_DB_PW
-            value: {{ required "database.mysql.roundcubePassword" .Values.database.mysql.roundcubePassword }}
+            valueFrom:
+              secretKeyRef:
+                name: {{ required "mailuSecretsName" .Values.mailuSecretsName }}
+                key: ROUNDCUBE_DB_PWD
           - name: ROUNDCUBE_DB_NAME
             value: {{ required "database.mysql.roundcubeDatabase" .Values.database.mysql.roundcubeDatabase }}
           - name: ROUNDCUBE_DB_HOST

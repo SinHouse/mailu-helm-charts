@@ -8,15 +8,14 @@ hostnames: []
 # The mail domain is required. See https://github.com/Mailu/Mailu/blob/master/docs/faq.rst#what-is-the-difference-between-domain-and-hostnames
 domain: example.com
 
-# The secret key is required for protecting authentication cookies and must be set individually for each deployment
-secretKey: chang3m3!
+# Secret must have this keys: ADMIN_PASSWORD,SECRET_KEY,MAILU_DB_PWD,ROUNDCUBE_DB_PWD
+# The SECRET_KEY is required for protecting authentication cookies and must be set individually for each deployment
+mailuSecretsName: mailu-secrets
 
 # An initial account can automatically be created:
 #initialAccount:
 #  username: mailadmin
 #  domain: mydomain.com
-#  password: chang3m3!
-
 
 nameOverride: ""
 fullnameOverride: ""
@@ -55,12 +54,10 @@ database:
     # settings for mailu (required if mailu database type is "mysql")
 #    database: mailu
 #    user: mailu
-#    password: chang3m3!
 
     # settings for roundcube (required if roundcube database type is "mysql")
 #    roundcubeDatabase: roundcube
 #    roundcubeUser: roundcube
-#    roundcubePassword: chang3m3!
 
 persistence:
 #  claimEnabled: false
