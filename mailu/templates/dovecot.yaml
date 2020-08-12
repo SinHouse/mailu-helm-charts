@@ -33,93 +33,130 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
-      - name: admin
-        image: {{ .Values.dovecot.image.repository }}:{{ default .Values.mailuVersion .Values.dovecot.image.tag }}
-        imagePullPolicy: Always
-        volumeMounts:
-          - name: data
-            subPath: dovecotdata
-            mountPath: /data
-          - name: data
-            mountPath: /mail
-            subPath: dovecotmail
-        env:
-          - name: LOG_LEVEL
-            value: {{ default .Values.logLevel .Values.dovecot.logLevel }}
-          - name: FRONT_ADDRESS
-            value: {{ include "mailu.fullname" . }}-front
-          - name: ADMIN_ADDRESS
-            value: {{ include "mailu.fullname" . }}-admin
-          - name: ANTISPAM_WEBUI_ADDRESS
-            value: {{ include "mailu.fullname" . }}-rspamd:11334
-          - name: POSTMASTER
-            value: postmaster
-          - name: DOMAIN
-            value: "{{ required "domain" .Values.domain }}"
-          - name: HOSTNAMES
-            value: "{{ join "," .Values.hostnames }}"
-          - name: RECIPIENT_DELIMITER
-            value: +
-          # TODO: COMPRESSION / COMPRESS_LEVEL -> documentation?
+        - name: vpn-client
+          image: mitsutaka/softether-vpnclient:v4.29-9680-rtm-2019.02.28
+          #          stdin: true
+          #          tty: true
+          securityContext:
+            privileged: true
+            capabilities:
+              add:
+                - NET_ADMIN
+          env:
+            #            - name: TZ
+            #              value: "UTC"
+            - name: VPN_SERVER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ required "vpnAccountSecretName" .Values.vpnAccountSecretName }}
+                  key: VPN_SERVER
+            - name: VPN_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ required "vpnAccountSecretName" .Values.vpnAccountSecretName }}
+                  key: VPN_PORT
+            - name: ACCOUNT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ required "vpnAccountSecretName" .Values.vpnAccountSecretName }}
+                  key: ACCOUNT_USER
+            - name: ACCOUNT_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ required "vpnAccountSecretName" .Values.vpnAccountSecretName }}
+                  key: ACCOUNT_PASS
+            - name: VIRTUAL_HUB
+              valueFrom:
+                secretKeyRef:
+                  name: {{ required "vpnAccountSecretName" .Values.vpnAccountSecretName }}
+                  key: VIRTUAL_HUB
+        - name: admin
+          image: {{ .Values.dovecot.image.repository }}:{{ default .Values.mailuVersion .Values.dovecot.image.tag }}
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: data
+              subPath: dovecotdata
+              mountPath: /data
+            - name: data
+              mountPath: /mail
+              subPath: dovecotmail
+          env:
+            - name: LOG_LEVEL
+              value: {{ default .Values.logLevel .Values.dovecot.logLevel }}
+            - name: FRONT_ADDRESS
+              value: {{ include "mailu.fullname" . }}-front
+            - name: ADMIN_ADDRESS
+              value: {{ include "mailu.fullname" . }}-admin
+            - name: ANTISPAM_WEBUI_ADDRESS
+              value: {{ include "mailu.fullname" . }}-rspamd:11334
+            - name: POSTMASTER
+              value: postmaster
+            - name: DOMAIN
+              value: "{{ required "domain" .Values.domain }}"
+            - name: HOSTNAMES
+              value: "{{ join "," .Values.hostnames }}"
+            - name: RECIPIENT_DELIMITER
+              value: +
+            # TODO: COMPRESSION / COMPRESS_LEVEL -> documentation?
 
-          # TODO: next entries should be removed when https://github.com/Mailu/Mailu/issues/1112 is fixed
-          - name: REDIS_ADDRESS
-            value: {{ include "mailu.fullname" . }}-redis
-          - name: WEBMAIL
-            value: none
-          - name: SECRET_KEY
-            valueFrom:
-              secretKeyRef:
-                name: {{ required "mailuSecretsName" .Values.mailuSecretsName }}
-                key: SECRET_KEY
-        ports:
-          - name: auth
-            containerPort: 2102
-            protocol: TCP
-          - name: lmtp
-            containerPort: 2525
-            protocol: TCP
-          - name: imap
-            containerPort: 143
-            protocol: TCP
-          - name: pop3
-            containerPort: 110
-            protocol: TCP
-          - name: sieve
-            containerPort: 4190
-            protocol: TCP
-        {{- with .Values.dovecot.resources }}
-        resources:
-        {{- .|toYaml|nindent 10}}
-        {{- end }}
-        livenessProbe:
-          exec:
-            command:
-              - sh
-              - -c
-              - 'echo QUIT|nc localhost 110|grep "Dovecot ready."'
-          periodSeconds: 10
-          failureThreshold: 30
-          timeoutSeconds: 5
-        readinessProbe:
-          exec:
-            command:
-              - sh
-              - -c
-              - 'echo QUIT|nc localhost 110|grep "Dovecot ready."'
-          periodSeconds: 10
-          failureThreshold: 3
-          timeoutSeconds: 5
+            # TODO: next entries should be removed when https://github.com/Mailu/Mailu/issues/1112 is fixed
+            - name: REDIS_ADDRESS
+              value: {{ include "mailu.fullname" . }}-redis
+            - name: WEBMAIL
+              value: none
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ required "mailuSecretsName" .Values.mailuSecretsName }}
+                  key: SECRET_KEY
+          ports:
+            - name: auth
+              containerPort: 2102
+              protocol: TCP
+            - name: lmtp
+              containerPort: 2525
+              protocol: TCP
+            - name: imap
+              containerPort: 143
+              protocol: TCP
+            - name: pop3
+              containerPort: 110
+              protocol: TCP
+            - name: sieve
+              containerPort: 4190
+              protocol: TCP
+          {{- with .Values.dovecot.resources }}
+          resources:
+            {{- .|toYaml|nindent 12}}
+          {{- end }}
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - 'echo QUIT|nc localhost 110|grep "Dovecot ready."'
+            periodSeconds: 10
+            failureThreshold: 30
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - 'echo QUIT|nc localhost 110|grep "Dovecot ready."'
+            periodSeconds: 10
+            failureThreshold: 3
+            timeoutSeconds: 5
       volumes:
         - name: data
           persistentVolumeClaim:
-{{- if .Values.dovecot.persistence.claimEnabled }}  
+{{- if .Values.dovecot.persistence.claimEnabled }}
 {{- if .Values.dovecot.persistence.existingClaim }}
             claimName: {{ .Values.dovecot.persistence.existingClaim }}
 {{- else }}
             {{- $_ := set . "deploy" "dovecot" }}
             claimName: {{ include "mailu.deployClaimName" . }}
-{{- end }}   
+{{- end }}
 {{- else }}
             claimName: {{ include "mailu.claimName" . }}
 {{- end }}

@@ -5,11 +5,11 @@
 apiVersion: {{ .Values.certmanager.apiVersion }}
 kind: Certificate
 metadata:
-  name: {{ include "mailu.fullname" . }}-certificates
+  name: smtp-{{ include "mailu.fullname" . }}-certificates
 spec:
-  secretName: {{ include "mailu.certificateSecretName" . }}
+  secretName: smtp-{{ include "mailu.fullname" . }}-certificates
   renewBefore: 1440h # 60d
-  commonName: "{{ first (required "hostname" .Values.hostnames) }}"
+  commonName: "{{ first (required "hostname" .Values.publicHostnames) }}"
   dnsNames:
   {{- range .Values.hostnames }}
   - "{{ . }}"

@@ -1,8 +1,12 @@
 # Default values for mailu.
+smtpPublicIP: ""
+privateIP: ""
 
 # A list of mail hostnames is required. The first will be used as primary mail hostname
+publicHostnames: []
+#  - smtp.example.com
+
 hostnames: []
-#  - mail.example.com
 #  - imap.example.com
 
 # The mail domain is required. See https://github.com/Mailu/Mailu/blob/master/docs/faq.rst#what-is-the-difference-between-domain-and-hostnames
@@ -11,6 +15,7 @@ domain: example.com
 # Secret must have this keys: ADMIN_PASSWORD,SECRET_KEY,MAILU_DB_PWD,ROUNDCUBE_DB_PWD
 # The SECRET_KEY is required for protecting authentication cookies and must be set individually for each deployment
 mailuSecretsName: mailu-secrets
+vpnAccountSecretName: user01-vpn-account
 
 # An initial account can automatically be created:
 #initialAccount:
@@ -94,8 +99,8 @@ certmanager:
   # ClusterIssuer or Issuer
   issuerType: ClusterIssuer
   # issuer name set in cert manager deployment
-  issuerName: letsencrypt
-
+  publicIssuerName: letsencrypt
+  privateIssuerName: letsencrypt
 
 # Set ingress and loadbalancer config
 ingress:
